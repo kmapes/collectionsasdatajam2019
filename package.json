@@ -1,0 +1,16 @@
+{
+  "name": "datajam",
+  "version": "1.0.0",
+  "description": "Team Dragon: Our DataJam",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "node-microdata-scraper": "0.0.5",
+    "prettier": "^1.18.2"
+  }
+}
