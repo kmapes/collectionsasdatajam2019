@@ -3,9 +3,11 @@ var searchURL = "https://www.wdl.org/en/search/?q=dragon&qla=en"
 var prefix = "https://www.wdl.org"
 
 
+// Take JSON data, make it pretty.  Only used for debugging
 function prettyPrint(data) {
    return JSON.stringify(data, null, 2);
 }
+
 
 function extractItemLocationData(url) {
   let fullUrl = prefix + url
@@ -38,6 +40,9 @@ function extractItemLocationData(url) {
         let csv = (`${fullUrl},"${place}","${lat}, ${lng}"`)
 
         output = csv
+
+        // Rather than figure out how to do this right, we're just dumping the 
+        // values out of the console.
         console.log(csv);
     }
   })
@@ -54,8 +59,6 @@ function extractItemData(url) {
     if (!err && json) {
         let data = JSON.parse(json);
 
-        // console.log(prettyPrint(data));
-// 
         let itemPage = data.filter((d) => d.name == "http://schema.org/ItemPage")[0]        
         let place = itemPage.properties.contentLocation;
         if (typeof place != "string") {
@@ -74,6 +77,8 @@ function extractItemData(url) {
         let subjects = [...new Set(props.keywords)].join("; ")
         let partners = props.provider[0];
         let collection = "";
+        
+        // sometime these are missing
         let lat = "";
         try{
            lat = geo.properties.latitude;
@@ -83,14 +88,15 @@ function extractItemData(url) {
           lng = geo.properties.longitude;
         }
         catch(e){}
+
         let locName = props.contentLocation;
         let imgUrl = ""
         let lang_name = ""
         let recordUrl = fullUrl;
         let csv = (`"${title}","${creator}","${dateCreated}","${type}","${subjects}","${partners}","${collection}","${lat}","${lng}","${locName}","${imgUrl}","${lang_name}","${recordUrl}"`)
 
-
-
+        // Rather than figure out how to do this right, we're just dumping the 
+        // values out of the console.
         console.log(csv);
     }
   })
@@ -98,7 +104,7 @@ function extractItemData(url) {
 }
 
 
-
+// Add in the header and get the location data
 function createLocationSpreadsheet(urls) {
   console.log("Record URL,Place,LatLong")
   for (let item of urls) {
@@ -106,11 +112,11 @@ function createLocationSpreadsheet(urls) {
   }
 }
 
+// Add in the header and get the item data
 function createObjectSpreadsheet(urls) {
   console.log("Title of work,Artist or author display,Date,Type of Item,Subjects,Partner institutions, Collection Name,Latitude,Longitude,Location name,Image (link),Title in original language,Record url")
   for (let item of urls) {
    extractItemData(item)
-   // return;
   }
 }
 
@@ -122,7 +128,7 @@ var page = 1;
 var getUrls = function myself(url) {
 
   microdata.parseUrl(url+"&page=" + page, function(err, json) {
-    // console.log(json, err)
+
     if (!err && json) {
     
       // Take the returned data and convert it into a JS object
@@ -130,16 +136,14 @@ var getUrls = function myself(url) {
       var items = data.filter((d) => {return d.name == "http://schema.org/ListItem"})
 
       if (items.length > 0) {
-      // create a list of URLs
-      var urls = items.map((d)=> allURLs.push(d.properties.url))
-      // console.log(page)
-      page++;
+        // create a list of URLs
+        var urls = items.map((d)=> allURLs.push(d.properties.url))
+        page++;
 
-      myself(url)
+        // Call myself recursively as long as there are items returned
+        myself(url)
     }
     else {
-      // console.log(allURLs);
-       let fakeURLs = ["/en/item/4677/"]
       createLocationSpreadsheet(allURLs)
       // createObjectSpreadsheet(allURLs)
     }

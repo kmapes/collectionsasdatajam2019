@@ -165,10 +165,11 @@ vals = [
 ]
 
 vals.each do |val| 
-  #response = Typhoeus.get(val, followlocation: true)
+
   id = val.split(",").first.split("/").last;
+
   response = Typhoeus.get("https://www.wdl.org/en/item/#{id}/iiif/manifest.json");
-  puts response
+
   manifest = JSON.parse(response.body)
   thumb= manifest["thumbnail"]["@id"]
   response2 = Typhoeus.get(thumb, followlocation: true)
